@@ -49,15 +49,16 @@ var DigitalDilemma = (function() {
             var cellId = j * game.dimensions.width + i;
             grid.push({
               id: cellId,
-              letter: String.fromCharCode(
-                'A'.charCodeAt(0) + cellId
-              )
+              letter: getLetter(cellId)
             });
           }
         }
 
         // initialize the instructions
         initializeInstructions();
+
+        // make sure you update the path
+        updatePath();
 
         // load the grid in the html
         populateGrid('grid', grid);
@@ -100,6 +101,28 @@ var DigitalDilemma = (function() {
         }
       });
     });
+
+    $('#grid').on('click', function(e) {
+      // pass through
+    }).on('click', '.cell', function(e) {
+      var index = e.target.id.substring('cell-'.length);
+      var intIndex = parseInt(index);
+      $.post(
+        '/api/game/digital/set/' + index, {}
+      ).done((function(idx) {
+        return function(res) {
+          if (res.success) {
+            // keep the client's game in sync
+            game.path.push(idx);
+
+            // redraw the path
+            updatePath();
+          } else {
+            alert('Unable to set.');
+          }
+        };
+      })(intIndex));
+    });
   }
 
   function initializeInstructions() {
@@ -118,6 +141,17 @@ var DigitalDilemma = (function() {
         $('#instructions').text(MESSAGES['started']);
       }
     }
+  }
+
+  function updatePath() {
+    $('#path').text(getPathString());
+  }
+
+  function getPathString() {
+    console.log(game.path);
+    return game.path.map(function(i) {
+      return getLetter(i);
+    }).join(',');
   }
 
   // the UI component of the grid
@@ -169,6 +203,10 @@ var DigitalDilemma = (function() {
       );
       return firstChannel;
     }
+  }
+
+  function getLetter(i) {
+    return String.fromCharCode('A'.charCodeAt(0) + i);
   }
 
   function getColor(r, g, b) {

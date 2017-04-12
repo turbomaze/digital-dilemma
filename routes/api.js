@@ -161,13 +161,37 @@ module.exports = function(io) {
   });
 
   router.post('/game/digital/set/:id', function(req, res) {
-    /*
-    if !isStarted || digitalIsSet
-      do nothing
-    else
-      set the next part of this path; must be unique
-    */
-    res.json({success: false, message: 'not impl'});
+    Game.findOne({
+      tag: process.env.PRIMARY_GAME_TAG
+    }, function(err, game) {
+      if (err || !game) {
+        console.log(err);
+        return res.json({success: false, error: err});
+      }
+
+      var i = parseInt(req.params.id);
+      if (
+        game.isStarted && !game.digitalIsSet &&
+        !game.isPaused &&
+        i >= 0 &&
+        i < game.dimensions.width * game.dimensions.height
+      ) {
+        game.path.push(i);
+        game.save(function(err) {
+          if (err) {
+            console.log(err);
+            return res.json({success: false, error: err});
+          }
+
+          res.json({success: true});
+        });
+      } else {
+        return res.json({
+          success: false,
+          error: 'cannot digital set right now'
+        });
+      }
+    });
   });
 
   router.get('/game/physical/reset', function(req, res) {

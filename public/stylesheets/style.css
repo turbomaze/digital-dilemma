@@ -128,3 +128,11 @@ h1 {
 .right b {
   text-transform: uppercase;
 }
+
+#path {
+  border-radius: 2px;
+  background: #EDFBFF;
+  font-family: Monospace;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+}
