@@ -76,12 +76,26 @@ h1 {
 #grid {
   width: 400px;
   height: 400px;
+  cursor: pointer;
 }
 
 .cell {
-  width: 25%;
-  height: 25%;
+  width: 100px;
+  height: 100px;
   float: left;
+  line-height: 100px;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #d3d2d1;
+}
+
+.cell:hover {
+  color: white;
+}
+
+.cell:active {
+  color: rgba(240, 50, 50, 255);
 }
 
 .button {

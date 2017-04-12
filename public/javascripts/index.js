@@ -43,12 +43,15 @@ var DigitalDilemma = (function() {
         game = res.game;
 
         // initialize the grid
-        for (var i = 0; i < game.dimensions.width; i++) {
-          for (var j = 0; j < game.dimensions.height; j++) {
+        for (var j = 0; j < game.dimensions.height; j++) {
+          for (var i = 0; i < game.dimensions.width; i++) {
             // the state component of the grid
             var cellId = j * game.dimensions.width + i;
             grid.push({
-              id: cellId
+              id: cellId,
+              letter: String.fromCharCode(
+                'A'.charCodeAt(0) + cellId
+              )
             });
           }
         }
@@ -123,7 +126,7 @@ var DigitalDilemma = (function() {
       var div = document.createElement('div');
       div.id = 'cell-' + gridToLoad[i].id;
       div.className = 'cell';
-      div.innerHTML = '&nbsp;';
+      div.innerHTML = gridToLoad[i].letter;
       document.getElementById(containerId).appendChild(div);
     }
   }
