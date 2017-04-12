@@ -1,6 +1,6 @@
-Maze Game
+Digital Dilemma
 ==
-A webapp for Anthony Liu and Lucia Liu's Maze Game for 4.110 S17, Charette 2.
+A webapp for Anthony Liu and Lucia Liu's game for 4.110 S17, Charette 2.
 
 ## Usage
 1. Set up a Mongo database and save its URI.
