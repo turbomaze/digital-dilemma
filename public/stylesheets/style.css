@@ -1,0 +1,28 @@
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:300,400,600);
+
+@import url(http://weloveiconfonts.com/api/?family=fontawesome);
+
+[class*="fontawesome-"]:before {
+  font-family: 'FontAwesome', sans-serif;
+}
+
+*, *:before, *:after {
+  box-sizing: border-box;
+}
+
+a {
+  text-decoration: none;
+  color: #333;
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  background: #eee;
+  margin: 0;
+  padding: 50px;
+  height: 100%;
+  font: 18px "Open Sans";
+}

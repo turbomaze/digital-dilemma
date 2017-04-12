@@ -1,0 +1,31 @@
+extends layout
+
+block extraHead
+  link(rel='stylesheet', href='/stylesheets/style.css')
+
+  script(src="/javascripts/index.js")
+  script.
+    var ROOT_URL = "#{rootUrl}";
+    var SOCKET_PORT = "#{socketPort}";
+    var socket = io.connect(ROOT_URL + ':' + SOCKET_PORT);
+
+block content
+   | This is Digital Dilemma. Welcome.
+
+   div#cell-0.cell &nbsp;
+   div#cell-1.cell &nbsp;
+   div#cell-2.cell &nbsp;
+   div#cell-3.cell &nbsp;
+   div#cell-4.cell &nbsp;
+   div#cell-5.cell &nbsp;
+   div#cell-6.cell &nbsp;
+   div#cell-7.cell &nbsp;
+   div#cell-8.cell &nbsp;
+   div#cell-9.cell &nbsp;
+   div#cell-10.cell &nbsp;
+   div#cell-11.cell &nbsp;
+   div#cell-12.cell &nbsp;
+   div#cell-13.cell &nbsp;
+   div#cell-14.cell &nbsp;
+   div#cell-15.cell &nbsp;
+   div#cell-16.cell &nbsp;
