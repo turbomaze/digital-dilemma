@@ -102,6 +102,20 @@ var DigitalDilemma = (function() {
       });
     });
 
+    $('#digital-reset-button').click(function() {
+      $.post(
+        '/api/game/digital/reset', {}
+      ).done(function(res) {
+        if (res.success) {
+          // digital's path has been reset
+          game.path = [];
+          updatePath();
+        } else {
+          alert('Unable to digital reset.');
+        }
+      });
+    });
+
     $('#grid').on('click', function(e) {
       // pass through
     }).on('click', '.cell', function(e) {
@@ -118,7 +132,7 @@ var DigitalDilemma = (function() {
             // redraw the path
             updatePath();
           } else {
-            alert('Unable to set.');
+            console.log('Unable to set.');
           }
         };
       })(intIndex));
@@ -148,7 +162,6 @@ var DigitalDilemma = (function() {
   }
 
   function getPathString() {
-    console.log(game.path);
     return game.path.map(function(i) {
       return getLetter(i);
     }).join(',');

@@ -112,6 +112,7 @@ h1 {
   padding: 10px 40px;
   text-decoration: none;
   text-transform: uppercase;
+  margin-right: 6px;
 }
 
 .button:hover {

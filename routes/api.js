@@ -140,13 +140,34 @@ module.exports = function(io) {
   });
 
   router.post('/game/digital/reset', function(req, res) {
-    /*
-    if digitalIsSet
-      do nothing
-    else
-      clear all the digital path stuff
-    */
-    res.json({success: false, message: 'not impl'});
+    Game.findOne({
+      tag: process.env.PRIMARY_GAME_TAG
+    }, function(err, game) {
+      if (err || !game) {
+        console.log(err);
+        return res.json({success: false, error: err});
+      }
+
+      if (
+        game.isStarted && !game.digitalIsSet &&
+        !game.isPaused
+      ) {
+        game.path = [];
+        game.save(function(err) {
+          if (err) {
+            console.log(err);
+            return res.json({success: false, error: err});
+          }
+
+          res.json({success: true});
+        });
+      } else {
+        return res.json({
+          success: false,
+          error: 'cannot digital reset right now'
+        });
+      }
+    });
   });
 
   router.post('/game/digital/set/done', function(req, res) {
