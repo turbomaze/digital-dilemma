@@ -2,12 +2,13 @@ var DigitalDilemma = (function() {
   // CONFIG
   var WIDTH = 4;
   var HEIGHT = 4;
-  var TOGGLE_DELAY = 500;
-  var RANDOM_COLORER = false;
-  var INTERVAL_DELAY = 100;
-  var GRAY_MAG = 4;
+  var TOGGLE_DELAY = 500; // on tap
+  var RANDOM_COLORER = false; // the interval timer
+  var INTERVAL_DELAY = 100; // changing the grid colors
+  var GRAY_MAG = 4; // gray magnitude to vary
 
   // STATE VARIABLES
+	var game;
   var grid = [];
 
   function initDigitalDilemma() {
@@ -20,25 +21,35 @@ var DigitalDilemma = (function() {
       toggleCell('#cell-10');
     });
 
-    // initialize the grid
-    for (var i = 0; i < WIDTH; i++) {
-      for (var j = 0; j < HEIGHT; j++) {
-        // the state component of the grid
-        var cellId = j * WIDTH + i;
-        grid.push({
-          id: cellId
-        });
+    $.get(
+			'/api/game', {}
+		).done(function(res) {
+      if (res.success) {
+				game = res.game;
+
+    		// initialize the grid
+    		for (var i = 0; i < game.dimensions.width; i++) {
+    		  for (var j = 0; j < game.dimensions.height; j++) {
+    		    // the state component of the grid
+    		    var cellId = j * game.dimensions.width + i;
+    		    grid.push({
+    		      id: cellId
+    		    });
+    		  }
+    		}
+
+    		// load the grid in the html
+    		populateGrid('grid', grid);
+
+    		// initialize grid colors
+    		RANDOM_COLORER = setInterval(
+    		  randomlyColorGray,
+    		  INTERVAL_DELAY
+    		);
+      } else {
+        alert(JSON.stringify(res.error));
       }
-    }
-
-    // load the grid in the html
-    populateGrid('grid', grid);
-
-    // initialize grid colors
-    RANDOM_COLORER = setInterval(
-      randomlyColorGray,
-      INTERVAL_DELAY
-    );
+    });
 
     // event listeners
   }
