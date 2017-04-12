@@ -74,6 +74,29 @@ var DigitalDilemma = (function() {
     });
 
     // event listeners
+    $('#secret-reset').click(function() {
+      $.get(
+        '/api/game/reset', {}
+      ).done(function(res) {
+        if (res.success) {
+          window.location = '/';
+        } else {
+          alert('Unable to reset.');
+        }
+      });
+    });
+
+    $('#start-button').click(function() {
+      $.get(
+        '/api/game/start', {}
+      ).done(function(res) {
+        if (res.success) {
+          // game is started!
+        } else {
+          alert('Unable to start. Maybe the game is ongoing!');
+        }
+      });
+    });
   }
 
   function initializeInstructions() {
