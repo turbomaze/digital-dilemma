@@ -12,7 +12,9 @@ module.exports = function(io) {
   });
 
   router.get('/admin', function(req, res, next) {
-    Game.findOne({tag: 'main'}, function(err, game) {
+    Game.findOne({
+      tag: process.env.PRIMARY_GAME_TAG
+    }, function(err, game) {
       if (err || !game) {
         res.json({
           success: false,
