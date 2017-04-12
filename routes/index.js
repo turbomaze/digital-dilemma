@@ -11,5 +11,18 @@ module.exports = function(io) {
     });
   });
 
+  router.get('/admin', function(req, res, next) {
+    Game.findOne({tag: 'main'}, function(err, game) {
+      if (err || !game) {
+        res.json({
+          success: false,
+          message: 'can\'t find the game'
+        });
+      } else {
+        res.json({success: true, game: game});
+      }
+    });
+  });
+
   return router;
 };
