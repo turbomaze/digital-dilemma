@@ -1,14 +1,18 @@
 var DigitalDilemma = (function() {
   // CONFIG
-  var WIDTH = 4;
-  var HEIGHT = 4;
   var TOGGLE_DELAY = 500; // on tap
-  var RANDOM_COLORER = false; // the interval timer
+  var RANDOM_COLORER_TIMER = false; // the interval timer
   var INTERVAL_DELAY = 100; // changing the grid colors
   var GRAY_MAG = 4; // gray magnitude to vary
+  var MESSAGES = {
+    'beginning': 'Click start to start the game.',
+    'started': 'Select a secret path in the grid.',
+    'digital-waiting': 'Waiting for other player to finish...',
+    'playing': 'Negotiate, swap, and play!',
+  };
 
   // STATE VARIABLES
-	var game;
+  var game;
   var grid = [];
 
   function initDigitalDilemma() {
@@ -21,37 +25,73 @@ var DigitalDilemma = (function() {
       toggleCell('#cell-10');
     });
 
+    socket.on('game-started', function() {
+      // sync the client's game with the server's game
+      game.isStarted = true;
+
+      // stop changing the color
+      clearInterval(RANDOM_COLORER_TIMER);
+
+      // change the client's instructions
+      $('#instructions').text(MESSAGES['started']);
+    });
+
     $.get(
-			'/api/game', {}
-		).done(function(res) {
+      '/api/game', {}
+    ).done(function(res) {
       if (res.success) {
-				game = res.game;
+        game = res.game;
 
-    		// initialize the grid
-    		for (var i = 0; i < game.dimensions.width; i++) {
-    		  for (var j = 0; j < game.dimensions.height; j++) {
-    		    // the state component of the grid
-    		    var cellId = j * game.dimensions.width + i;
-    		    grid.push({
-    		      id: cellId
-    		    });
-    		  }
-    		}
+        // initialize the grid
+        for (var i = 0; i < game.dimensions.width; i++) {
+          for (var j = 0; j < game.dimensions.height; j++) {
+            // the state component of the grid
+            var cellId = j * game.dimensions.width + i;
+            grid.push({
+              id: cellId
+            });
+          }
+        }
 
-    		// load the grid in the html
-    		populateGrid('grid', grid);
+        // initialize the instructions
+        initializeInstructions();
 
-    		// initialize grid colors
-    		RANDOM_COLORER = setInterval(
-    		  randomlyColorGray,
-    		  INTERVAL_DELAY
-    		);
+        // load the grid in the html
+        populateGrid('grid', grid);
+
+        // initialize grid colors
+        if (!game.isStarted) {
+          RANDOM_COLORER_TIMER = setInterval(
+            randomlyColorGray,
+            INTERVAL_DELAY
+          );
+        } else {
+          randomlyColorGray();
+        }
       } else {
         alert(JSON.stringify(res.error));
       }
     });
 
     // event listeners
+  }
+
+  function initializeInstructions() {
+    if (!game.isStarted) {
+      $('#instructions').text(MESSAGES['beginning']);
+    } else {
+      if (game.digitalIsSet) {
+        if (game.physicalIsSet) {
+          $('#instructions').text(MESSAGES['playing']);
+        } else {
+          $('#instructions').text(
+            MESSAGES['digital-waiting']
+          );
+        }
+      } else {
+        $('#instructions').text(MESSAGES['started']);
+      }
+    }
   }
 
   // the UI component of the grid
@@ -66,7 +106,8 @@ var DigitalDilemma = (function() {
   }
 
   function randomlyColorGray() {
-    for (var i = 0; i < WIDTH * HEIGHT; i++) {
+    var count = game.dimensions.width * game.dimensions.height;
+    for (var i = 0; i < count; i++) {
       var id = '#cell-' + i;
       var g = Math.floor(100 + 50 * Math.random());
       var oldGray = extractColor($(id).css('background-color'));
