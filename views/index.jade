@@ -8,10 +8,22 @@ block extraHead
     var ROOT_URL = "#{rootUrl}";
     var SOCKET_PORT = "#{socketPort}";
     var socket = io.connect(ROOT_URL + ':' + SOCKET_PORT);
+    var STATE = 0;
 
 block content
   div.header
     h1 this is <span class="red">digital</span> dilemma.
     h1 welcome.
 
-  div#grid
+  div.col-container
+    div.left
+      div#grid
+
+    div.right
+      b Instructions
+      div#instructions
+        | Click start to start the game.
+      br
+      a#start-button.button start
+
+    br.clear
