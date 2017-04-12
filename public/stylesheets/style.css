@@ -15,6 +15,11 @@ a {
   color: #333;
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
 html {
   height: 100%;
 }
@@ -25,4 +30,27 @@ body {
   padding: 50px;
   height: 100%;
   font: 18px "Open Sans";
+}
+
+.red {
+  color: red;
+}
+
+.header {
+  width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#grid {
+  width: 500px;
+  height: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cell {
+  width: 25%;
+  height: 25%;
+  float: left;
 }
