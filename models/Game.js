@@ -8,7 +8,6 @@ var GameSchema = new mongoose.Schema({
   isFinished: requiredBoolean,
   physicalIsSet: requiredBoolean,
   digitalIsSet: requiredBoolean,
-  isPaused: requiredBoolean,
   tag: {
     required: true,
     type: String
