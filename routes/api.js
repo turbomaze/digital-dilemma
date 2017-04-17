@@ -81,7 +81,10 @@ module.exports = function(io) {
         return res.json({success: false, error: err});
       }
 
-      if (game.isStarted && !game.isPaused && !game.isFinished) {
+      if (
+        game.isStarted && !game.isPaused && !game.isFinished &&
+        game.player1.isSet && game.player2.isSet
+      ) {
         var gameOver = false;
         var lostLife = false;
         var player = game.turn ? game.player1 : game.player2;
