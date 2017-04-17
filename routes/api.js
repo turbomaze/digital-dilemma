@@ -7,8 +7,8 @@ module.exports = function(io) {
   // HELPERS
   var defaultWidth = 2;
   var defaultHeight = 2;
-  var defaultLives = 3;
-  var defaultTime = 6;
+  var defaultLives = 6;
+  var defaultTime = 20;
 
   function pyRange(n) {
     var ret = [];
@@ -338,6 +338,14 @@ module.exports = function(io) {
           if (err) {
             console.log(err);
             return res.json({success: false, error: err});
+          }
+
+          if (guessedRight && newGuess) {
+          console.log('swag');
+            io.sockets.emit('guessed-correctly', {
+              player: id,
+              guess: player.guess
+            });
           }
 
           res.json({success: true});

@@ -48,6 +48,13 @@ var DigitalDilemmaBoard = (function() {
         updateTime();
       }
     });
+    socket.on('guessed-correctly', function(data) {
+      if (PLAYER === data.player) {
+        var player = PLAYER === 1 ? game.player1 : game.player2;
+        player.guess = data.guess;
+        updateGrid();
+      }
+    });
     socket.on('lost-life', function(data) {
       if (PLAYER === data.player) {
         var player = PLAYER === 1 ? game.player1 : game.player2;
@@ -80,7 +87,7 @@ var DigitalDilemmaBoard = (function() {
 
   function updateGrid() {
     var player = PLAYER === 1 ? game.player1 : game.player2;
-    player.guess.forEach(function(value, index) {
+    player.guess.map(function(value, index) {
       if (value === 1) {
         colorCell('guess-cell-' + index, COLOR_ONE);
       } else if (value === 2) {
@@ -116,13 +123,7 @@ var DigitalDilemmaBoard = (function() {
   }
 
   function colorCell(id, color) {
-    var oldColor = $(id).css('background-color');
-    $(id).css('background-color', color);
-    setTimeout((function(colorToRestore) {
-      return function() {
-        $(id).css('background-color', colorToRestore);
-      };
-    })(oldColor), TOGGLE_DELAY);
+    document.getElementById(id).style.background = color;
   }
 
   return {
