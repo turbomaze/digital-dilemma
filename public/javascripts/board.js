@@ -48,8 +48,8 @@ var DigitalDilemmaBoard = (function() {
     while (minutes.length < 2) { minutes = '0' + minutes; }
     var seconds = (time % 60) + '';
     while (seconds.length < 2) { seconds = '0' + seconds; }
-    document.getElementById('minutes').innerHMTL = minutes;
-    document.getElementById('seconds').innerHMTL = seconds;
+    document.getElementById('minutes').innerHTML = minutes;
+    document.getElementById('seconds').innerHTML = seconds;
   }
 
   function updateGrid() {
@@ -97,11 +97,6 @@ var DigitalDilemmaBoard = (function() {
         $(id).css('background-color', colorToRestore);
       };
     })(oldColor), TOGGLE_DELAY);
-  }
-
-  // HELPERS
-  function getColor(r, g, b) {
-    return 'rgba(' + r + ',' + g + ',' + b + ', 255)';
   }
 
   return {
