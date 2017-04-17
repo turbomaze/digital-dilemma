@@ -1,0 +1,24 @@
+extends layout
+
+block extraHead
+  link(rel='stylesheet', href='/stylesheets/style.css')
+
+  script(src="https://use.fontawesome.com/f62c327aa8.js")
+  script(src="/javascripts/board.js")
+  script.
+    var ROOT_URL = "#{rootUrl}";
+    var SOCKET_PORT = "#{socketPort}";
+    var PLAYER = #{playerId};
+    var socket = io.connect(ROOT_URL + ':' + SOCKET_PORT);
+
+block content
+  div.board-container
+    h1
+      <span id="seconds">00</span>:<span id="hundredths">00</span>
+
+    div#guess-grid
+
+    div.hearts
+      <i id="heart-one" class="heart fa fa-heart" aria-hidden="true"></i>
+      <i id="heart-two" class="heart fa fa-heart" aria-hidden="true"></i>
+      <i id="heart-three" class="heart fa fa-heart" aria-hidden="true"></i>

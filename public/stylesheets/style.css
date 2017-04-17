@@ -141,3 +141,38 @@ h1 {
   padding: 0.25rem 0.75rem;
   font-size: 0.875rem;
 }
+
+.board-container h1 {
+  font-size: 5rem;
+  text-align: center;
+  color: #303030;
+}
+
+#guess-grid {
+  width: 80%;
+  max-width: 300px;
+  margin-top: 2rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#guess-grid .cell {
+  background: #ccc;
+  border: 3px solid #eee;
+  border-radius: 6px;
+}
+
+.hearts {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.hearts .heart {
+  font-size: 3rem;
+  color: #d03035;
+}
+
+.hearts .heart.broken {
+  font-size: 3rem;
+  color: #ccc;
+}

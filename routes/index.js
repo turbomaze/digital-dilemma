@@ -26,5 +26,14 @@ module.exports = function(io) {
     });
   });
 
+  router.get('/board/:id', function(req, res, next) {
+    var id = parseInt(req.params.id);
+    res.render('board', {
+      rootUrl: process.env.ROOT_URL,
+      socketPort: process.env.SOCKET_PORT,
+      playerId: id
+    });
+  });
+
   return router;
 };
