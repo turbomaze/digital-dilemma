@@ -11,7 +11,7 @@ module.exports = function(io) {
     });
   });
 
-  router.get('/admin', function(req, res, next) {
+  router.get('/game', function(req, res, next) {
     Game.findOne({
       tag: process.env.PRIMARY_GAME_TAG
     }, function(err, game) {

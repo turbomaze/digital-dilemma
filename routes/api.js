@@ -26,39 +26,47 @@ module.exports = function(io) {
       zeroes.push(0);
     }
 
-    Game.update({
+    Game.remove({
       tag: process.env.PRIMARY_GAME_TAG
-    }, {
-      $set: {
-        tag: process.env.PRIMARY_GAME_TAG,
-        'dimensions.width': defaultWidth,
-        'dimensions.height': defaultHeight,
-        isStarted: false,
-        isPaused: false,
-        isFinished: false,
-        turn: true,
-        'player1.isSet': false,
-        'player1.grid': zeroes.slice(0),
-        'player1.guess': zeroes.slice(0),
-        'player1.guessPosition': -1,
-        'player1.isSafe': false,
-        'player1.lives': defaultLives,
-        'player1.time': defaultTime,
-
-        'player2.isSet': false,
-        'player2.grid': zeroes.slice(0),
-        'player2.guess': zeroes.slice(0),
-        'player2.guessPosition': -1,
-        'player2.isSafe': false,
-        'player2.lives': defaultLives,
-        'player2.time': defaultTime
-      }
-    }, {upsert: true}, function(err, data) {
+    }, function(err) {
       if (err) {
-        return failure(err, data);
+        return failure(err);
       }
-
-      success(err, data);
+    
+      Game.update({
+        tag: process.env.PRIMARY_GAME_TAG
+      }, {
+        $set: {
+          tag: process.env.PRIMARY_GAME_TAG,
+          'dimensions.width': defaultWidth,
+          'dimensions.height': defaultHeight,
+          isStarted: false,
+          isPaused: false,
+          isFinished: false,
+          turn: true,
+          'player1.isSet': false,
+          'player1.grid': zeroes.slice(0),
+          'player1.guess': zeroes.slice(0),
+          'player1.guessPosition': -1,
+          'player1.isSafe': false,
+          'player1.lives': defaultLives,
+          'player1.time': defaultTime,
+  
+          'player2.isSet': false,
+          'player2.grid': zeroes.slice(0),
+          'player2.guess': zeroes.slice(0),
+          'player2.guessPosition': -1,
+          'player2.isSafe': false,
+          'player2.lives': defaultLives,
+          'player2.time': defaultTime
+        }
+      }, {upsert: true}, function(err, data) {
+        if (err) {
+          return failure(err, data);
+        }
+  
+        success(err, data);
+      });
     });
   }
 
