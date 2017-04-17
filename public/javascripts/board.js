@@ -8,7 +8,7 @@ var DigitalDilemmaBoard = (function() {
   var grid = [];
 
   function initDigitalDilemmaBoard() {
-    // init everything
+    // init html grid
     for (var j = 0; j < HEIGHT; j++) {
       for (var i = 0; i < WIDTH; i++) {
         // the state component of the grid
@@ -20,11 +20,59 @@ var DigitalDilemmaBoard = (function() {
     // load the grid in the html
     populateGrid('guess-grid', 'guess-cell-', grid);
 
+    // get the first batch of data for the page
+    $.get(
+      '/game'
+    ).done(function(data) {
+      if (data.success === true) {
+        game = data.game;
+
+        updateTime();
+        updateGrid();
+        updateLives();
+      } else {
+        alert(JSON.stringify(res.error));
+      }
+    });
+
     // socket stuff
     socket.on('game-started', function() {
+      // swag
     });
   }
 
+  function updateTime() {
+    var player = PLAYER === 1 ? game.player1 : game.player2;
+    var time = player.time;
+    var minutes = Math.floor(time/60) + '';
+    while (minutes.length < 2) { minutes = '0' + minutes; }
+    var seconds = (time % 60) + '';
+    while (seconds.length < 2) { seconds = '0' + seconds; }
+    document.getElementById('minutes').innerHMTL = minutes;
+    document.getElementById('seconds').innerHMTL = seconds;
+  }
+
+  function updateGrid() {
+    var player = PLAYER === 1 ? game.player1 : game.player2;
+    player.guess.forEach(function(value, index) {
+      if (value === 1) {
+        colorCell('guess-cell-' + index, 'red');
+      } else if (value === 2) {
+        colorCell('guess-cell-' + index, 'blue');
+      }
+    });
+  }
+
+  function updateLives() {
+    var player = PLAYER === 1 ? game.player1 : game.player2;
+    for (var i = 2; i >= 0; i--) {
+      if (i >= player.lives) {
+        var id = 'heart-' + i;
+        document.getElementById(id).className = 'broken heart fa fa-heart';
+      }
+    }
+  }
+  
   // the UI component of the grid
   function populateGrid(containerId, cellName, gridToLoad) {
     var width = document.getElementById(containerId).offsetWidth;
@@ -41,9 +89,9 @@ var DigitalDilemmaBoard = (function() {
     document.getElementById(containerId).appendChild(br);
   }
 
-  function toggleCell(id) {
+  function colorCell(id, color) {
     var oldColor = $(id).css('background-color');
-    $(id).css('background-color', 'rgba(200, 50, 50, 255)');
+    $(id).css('background-color', color);
     setTimeout((function(colorToRestore) {
       return function() {
         $(id).css('background-color', colorToRestore);

@@ -168,11 +168,10 @@ h1 {
 }
 
 .hearts .heart {
-  font-size: 3rem;
+  font-size: 4rem;
   color: #d03035;
 }
 
 .hearts .heart.broken {
-  font-size: 3rem;
   color: #ccc;
 }
