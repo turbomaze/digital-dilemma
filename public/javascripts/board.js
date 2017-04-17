@@ -48,6 +48,18 @@ var DigitalDilemmaBoard = (function() {
         updateTime();
       }
     });
+    socket.on('set-cell', function(data) {
+      if (PLAYER === data.player) {
+        var player = PLAYER === 1 ? game.player1 : game.player2;
+        player.grid = data.grid;
+        updateGrid();
+      }
+    });
+    socket.on('everyones-set', function(data) {
+      game.player1.isSet = true;
+      game.player2.isSet = true;
+      updateGrid();
+    });
     socket.on('guessed-correctly', function(data) {
       if (PLAYER === data.player) {
         var player = PLAYER === 1 ? game.player1 : game.player2;
@@ -87,13 +99,23 @@ var DigitalDilemmaBoard = (function() {
 
   function updateGrid() {
     var player = PLAYER === 1 ? game.player1 : game.player2;
-    player.guess.map(function(value, index) {
-      if (value === 1) {
-        colorCell('guess-cell-' + index, COLOR_ONE);
-      } else if (value === 2) {
-        colorCell('guess-cell-' + index, COLOR_TWO);
-      }
-    });
+    if (game.player1.isSet && game.player2.isSet) {
+      player.guess.map(function(value, index) {
+        if (value === 1) {
+          colorCell('guess-cell-' + index, COLOR_ONE);
+        } else if (value === 2) {
+          colorCell('guess-cell-' + index, COLOR_TWO);
+        }
+      });
+    } else {
+      player.grid.map(function(value, index) {
+        if (value === 1) {
+          colorCell('guess-cell-' + index, COLOR_ONE);
+        } else if (value === 2) {
+          colorCell('guess-cell-' + index, COLOR_TWO);
+        }
+      });
+    }
   }
 
   function updateLives() {

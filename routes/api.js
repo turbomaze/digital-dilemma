@@ -394,7 +394,14 @@ module.exports = function(io) {
             if (game.player1.isSet && game.player2.isSet) {
               // start the timer
               decreaseTimer();
+
+              io.sockets.emit('everyones-set');
             }
+
+            io.sockets.emit('set-cell', {
+              player: id,
+              grid: player.grid
+            });
 
             return res.json({success: true});
           });
