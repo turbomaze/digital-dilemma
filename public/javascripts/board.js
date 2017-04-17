@@ -2,8 +2,8 @@ var DigitalDilemmaBoard = (function() {
   // CONFIG
   var WIDTH = 2;
   var HEIGHT = 2;
-  var COLOR_ONE = 'red';
-  var COLOR_TWO = 'blue';
+  var COLOR_ONE = '#F21D72';
+  var COLOR_TWO = '#467CFA';
 
   // STATE VARIABLES
   var game;
