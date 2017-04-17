@@ -183,6 +183,44 @@ module.exports = function(io) {
     });
   });
 
+  router.get('/restart', function(req, res) {
+    resetMainGame((function(myReq, myRes) {
+      return function(err, data) {
+        // success
+        Game.findOne({
+          tag: process.env.PRIMARY_GAME_TAG
+        }, function(err, game) {
+          if (err || !game) {
+            console.log(err);
+            return myRes.json({success: false, error: err});
+          }
+
+          if (!game.isStarted) {
+            game.isStarted = true;
+            game.save(function(err) {
+              if (err) {
+                console.log(err);
+                return myRes.json({success: false, error: err});
+              }
+
+              // notify everyone the game has started
+              io.sockets.emit('game-started');
+
+              return myRes.json({success: true});
+            });
+          } else {
+            return myRes.json({success: false, message: 'redundant'});
+          }
+        });
+      };
+    })(req, res), (function(myReq, myRes) {
+      return function(err, data) {
+        console.log(err);
+        return myRes.json({success: false, error: err});
+      };
+    })(req, res));
+  });
+
   router.get('/grid/:id/reset', function(req, res) {
     var id = parseInt(req.params.id);
     Game.findOne({
@@ -325,11 +363,19 @@ module.exports = function(io) {
         // get the right answer
         var rightAnswer = other.grid[player.guessPosition];
         // compare to their guess
+        var wonGame = false;
         var guessedRight = rightAnswer == color;
         var newGuess = player.guess[player.guessPosition] === 0;
         if (guessedRight && newGuess) {
           player.isSafe = true;
           player.guess.set(player.guessPosition, color);
+          var p = player.guess.reduce(function(a, b) {
+            return a * b;
+          }, 1);
+          if (p !== 0) {
+            // because they guessed everything correctly
+            wonGame = true; 
+          }
         } else if (!guessedRight) {
           player.lives = player.lives - 1;
         }
@@ -341,7 +387,6 @@ module.exports = function(io) {
           }
 
           if (guessedRight && newGuess) {
-          console.log('swag');
             io.sockets.emit('guessed-correctly', {
               player: id,
               guess: player.guess
