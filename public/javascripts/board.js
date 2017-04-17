@@ -105,6 +105,8 @@ var DigitalDilemmaBoard = (function() {
           colorCell('guess-cell-' + index, COLOR_ONE);
         } else if (value === 2) {
           colorCell('guess-cell-' + index, COLOR_TWO);
+        } else {
+          colorCell('guess-cell-' + index, '#ccc');
         }
       });
     } else {
@@ -113,6 +115,8 @@ var DigitalDilemmaBoard = (function() {
           colorCell('guess-cell-' + index, COLOR_ONE);
         } else if (value === 2) {
           colorCell('guess-cell-' + index, COLOR_TWO);
+        } else {
+          colorCell('guess-cell-' + index, '#ccc');
         }
       });
     }
