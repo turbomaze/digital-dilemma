@@ -367,6 +367,7 @@ module.exports = function(io) {
         var rightAnswer = other.grid[player.guessPosition];
         // compare to their guess
         var wonGame = false;
+        var otherWonGame = false;
         var guessedRight = rightAnswer == color;
         var newGuess = player.guess[player.guessPosition] === 0;
         if (guessedRight && newGuess) {
@@ -382,6 +383,10 @@ module.exports = function(io) {
           }
         } else if (!guessedRight) {
           player.lives = player.lives - 1;
+          if (player.lives === 0) {
+            otherWonGame = true;
+            game.isFinished = true;
+          }
         }
 
         game.save(function(err) {
@@ -407,6 +412,10 @@ module.exports = function(io) {
           if (wonGame) {
             io.sockets.emit('game-over', {
               winner: id
+            });
+          } else if (otherWonGame) {
+            io.sockets.emit('game-over', {
+              winner: 3 - id
             });
           }
 
