@@ -7,8 +7,6 @@ module.exports = function(io) {
   // HELPERS
   var defaultWidth = 2;
   var defaultHeight = 2;
-  var defaultLives = 3;
-  var defaultTime = 10;
 
   function pyRange(n) {
     var ret = [];
@@ -48,16 +46,16 @@ module.exports = function(io) {
           'player1.guess': zeroes.slice(0),
           'player1.guessPosition': -1,
           'player1.isSafe': false,
-          'player1.lives': defaultLives,
-          'player1.time': defaultTime,
+          'player1.lives': parseInt(process.env.DEFAULT_LIVES),
+          'player1.time': parseInt(process.env.DEFAULT_TIME),
   
           'player2.isSet': false,
           'player2.grid': zeroes.slice(0),
           'player2.guess': zeroes.slice(0),
           'player2.guessPosition': -1,
           'player2.isSafe': false,
-          'player2.lives': defaultLives,
-          'player2.time': defaultTime
+          'player2.lives': parseInt(process.env.DEFAULT_LIVES),
+          'player2.time': parseInt(process.env.DEFAULT_TIME)
         }
       }, {upsert: true}, function(err, data) {
         if (err) {
@@ -91,7 +89,7 @@ module.exports = function(io) {
         var originalTurn = game.turn;
         player.time -= 1;
         if (player.time === 0) {
-          player.time = defaultTime;
+          player.time = parseInt(process.env.DEFAULT_TIME);
           game.turn = !game.turn;
           if (!player.isSafe) {
             player.lives -= 1;
