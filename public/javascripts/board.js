@@ -37,7 +37,21 @@ var DigitalDilemmaBoard = (function() {
 
     // socket stuff
     socket.on('game-started', function() {
-      // swag
+      console.log('game started');
+    });
+    socket.on('timer', function(data) {
+      if (PLAYER === data.player) {
+        var player = PLAYER === 1 ? game.player1 : game.player2;
+        player.time = data.time;
+        updateTime();
+      }
+    });
+    socket.on('lost-life', function(data) {
+      if (PLAYER === data.player) {
+        var player = PLAYER === 1 ? game.player1 : game.player2;
+        player.lives = data.lives;
+        updateLives();
+      }
     });
   }
 

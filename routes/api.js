@@ -5,6 +5,11 @@ var ObjectId = require('mongoose').Types.ObjectId;
 
 module.exports = function(io) {
   // HELPERS
+  var defaultWidth = 2;
+  var defaultHeight = 2;
+  var defaultLives = 3;
+  var defaultTime = 60;
+
   function pyRange(n) {
     var ret = [];
     for (var i = 0; i < n; i++) {
@@ -14,12 +19,6 @@ module.exports = function(io) {
   }
 
   function resetMainGame(success, failure) {
-    // defaults
-    var defaultWidth = 2;
-    var defaultHeight = 2;
-    var defaultLives = 3;
-    var defaultTime = 60;
-
     // make a list of zeroes
     var zeroes = [];
     for (var i = 0; i < defaultWidth * defaultHeight; i++) {
@@ -70,6 +69,74 @@ module.exports = function(io) {
     });
   }
 
+  function decreaseTimer() {
+    var start = +new Date();
+    Game.findOne({
+      tag: process.env.PRIMARY_GAME_TAG
+    }, function(err, game) {
+      if (err || !game) {
+        console.log(err);
+        return res.json({success: false, error: err});
+      }
+
+      if (game.isStarted && !game.isPaused) {
+        var gameOver = false;
+        var lostLife = false;
+        var player = game.turn ? game.player1 : game.player2;
+        var originalTurn = game.turn;
+        player.time -= 1;
+        if (player.time === 0) {
+          player.time = defaultTime;
+          game.turn = !game.turn;
+          if (!player.isSafe) {
+            player.lives -= 1;
+            lostLife = true;
+            if (player.lives === 0) {
+              gameOver = true;
+            }
+          } else {
+            player.isSafe = false;
+          }
+        }
+
+        game.save(function(err) {
+          if (err) {
+            console.log(err);
+            return res.json({success: false, error: err});
+          }
+
+          io.sockets.emit('timer', {
+            player: originalTurn ? 1 : 2,
+            time: player.time
+          });
+
+          if (lostLife) {
+            io.sockets.emit('lost-life', {
+              player: originalTurn ? 1 : 2,
+              lives: player.lives
+            });
+          }
+
+          if (gameOver) {
+            // guaranteed that game.turn = !originalTurn
+            io.sockets.emit('game-over', {
+              winner: game.turn ? 1 : 2
+            });
+          }
+
+          var end = +new Date();
+          var duration = end - start;
+
+          // call the timer again if it should be continued
+          setTimeout(decreaseTimer, 1000 - duration);
+        });
+      } else {
+        // oops
+        return false;
+      }
+    });
+  }
+
   // NORMAL API ENDPOINTS
 
   router.get('/reset', function(req, res) {
@@ -104,6 +171,9 @@ module.exports = function(io) {
 
           // notify everyone the game has started
           io.sockets.emit('game-started');
+
+          // start the timer
+          decreaseTimer();
 
           res.json({success: true});
         });
