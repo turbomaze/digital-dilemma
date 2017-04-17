@@ -175,9 +175,6 @@ module.exports = function(io) {
           // notify everyone the game has started
           io.sockets.emit('game-started');
 
-          // start the timer
-          decreaseTimer();
-
           res.json({success: true});
         });
       } else {
@@ -186,7 +183,7 @@ module.exports = function(io) {
     });
   });
 
-  router.post('/grid/:id/reset', function(req, res) {
+  router.get('/grid/:id/reset', function(req, res) {
     var id = parseInt(req.params.id);
     Game.findOne({
       tag: process.env.PRIMARY_GAME_TAG
@@ -202,7 +199,7 @@ module.exports = function(io) {
         !game.isPaused && !game.isFinished
       ) {
         for (var i = 0; i < player.grid.length; i++) {
-          game.path[i] = 0;
+          player.grid.set(i, 0);
         }
         game.save(function(err) {
           if (err) {
@@ -221,7 +218,7 @@ module.exports = function(io) {
     });
   });
 
-  router.post('/grid/:id/set/:color', function(req, res) {
+  router.get('/grid/:id/set/:color', function(req, res) {
     var id = parseInt(req.params.id);
     var color = parseInt(req.params.color);
     Game.findOne({
@@ -240,7 +237,7 @@ module.exports = function(io) {
         var allAreReplaced = true;
         for (var i = 0; i < player.grid.length; i++) {
           if (player.grid[i] === 0) {
-            player.grid[i] = color;
+            player.grid.set(i, color);
             if (i !== player.grid.length - 1) {
               allAreReplaced = false;
             }
@@ -248,7 +245,7 @@ module.exports = function(io) {
           }
         }
 
-        if (!replacedAColor) {
+        if (allAreReplaced) {
           player.isSet = true;
         }
 
@@ -256,6 +253,11 @@ module.exports = function(io) {
           if (err) {
             console.log(err);
             return res.json({success: false, error: err});
+          }
+
+          if (game.player1.isSet && game.player2.isSet) {
+            // start the timer
+            decreaseTimer();
           }
 
           res.json({success: true});
@@ -269,7 +271,7 @@ module.exports = function(io) {
     });
   });
 
-  router.post('/grid/:id/position/:pos', function(req, res) {
+  router.get('/grid/:id/position/:pos', function(req, res) {
     var id = parseInt(req.params.id);
     var pos = parseInt(req.params.pos);
     Game.findOne({
@@ -303,7 +305,7 @@ module.exports = function(io) {
     });
   });
 
-  router.post('/grid/:id/guess/:color', function(req, res) {
+  router.get('/grid/:id/guess/:color', function(req, res) {
     var id = parseInt(req.params.id);
     var color = parseInt(req.params.color);
     Game.findOne({
@@ -327,6 +329,7 @@ module.exports = function(io) {
         var newGuess = player.guess[player.guessPosition] === 0;
         if (guessedRight && newGuess) {
           player.isSafe = true;
+          player.guess.set(player.guessPosition, color);
         } else if (!guessedRight) {
           player.lives = player.lives - 1;
         }
