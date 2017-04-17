@@ -375,6 +375,7 @@ module.exports = function(io) {
           if (p !== 0) {
             // because they guessed everything correctly
             wonGame = true; 
+            game.isFinished = true;
           }
         } else if (!guessedRight) {
           player.lives = player.lives - 1;
@@ -390,6 +391,19 @@ module.exports = function(io) {
             io.sockets.emit('guessed-correctly', {
               player: id,
               guess: player.guess
+            });
+          }
+
+          if (!guessedRight) {
+            io.sockets.emit('lost-life', {
+              player: id,
+              lives: player.lives
+            });
+          }
+
+          if (wonGame) {
+            io.sockets.emit('game-over', {
+              winner: id
             });
           }
 
