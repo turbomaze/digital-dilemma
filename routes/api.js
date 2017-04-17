@@ -8,7 +8,7 @@ module.exports = function(io) {
   var defaultWidth = 2;
   var defaultHeight = 2;
   var defaultLives = 3;
-  var defaultTime = 60;
+  var defaultTime = 6;
 
   function pyRange(n) {
     var ret = [];
@@ -63,6 +63,8 @@ module.exports = function(io) {
         if (err) {
           return failure(err, data);
         }
+
+        io.sockets.emit('game-reset');
   
         success(err, data);
       });

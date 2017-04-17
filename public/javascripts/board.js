@@ -59,6 +59,8 @@ var DigitalDilemmaBoard = (function() {
       } else {
         alert('Aww, you lost the game.');
       }
+    });
+    socket.on('game-reset', function() {
       window.location.reload(true);
     });
   }
