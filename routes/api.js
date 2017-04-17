@@ -7,8 +7,8 @@ module.exports = function(io) {
   // HELPERS
   var defaultWidth = 2;
   var defaultHeight = 2;
-  var defaultLives = 6;
-  var defaultTime = 20;
+  var defaultLives = 3;
+  var defaultTime = 10;
 
   function pyRange(n) {
     var ret = [];
@@ -371,7 +371,9 @@ module.exports = function(io) {
         var guessedRight = rightAnswer == color;
         var newGuess = player.guess[player.guessPosition] === 0;
         if (guessedRight && newGuess) {
-          player.isSafe = true;
+          if (id === (game.turn ? 1 : 2)) {
+            player.isSafe = true;
+          }
           player.guess.set(player.guessPosition, color);
           var p = player.guess.reduce(function(a, b) {
             return a * b;
