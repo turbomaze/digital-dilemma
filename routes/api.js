@@ -246,6 +246,11 @@ module.exports = function(io) {
             return res.json({success: false, error: err});
           }
 
+          io.sockets.emit('grid-reset', {
+            player: id,
+            grid: player.grid
+          });
+
           res.json({success: true});
         });
       } else {

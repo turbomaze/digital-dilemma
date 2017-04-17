@@ -60,6 +60,13 @@ var DigitalDilemmaBoard = (function() {
       game.player2.isSet = true;
       updateGrid();
     });
+    socket.on('grid-reset', function(data) {
+      if (PLAYER === data.player) {
+        var player = PLAYER === 1 ? game.player1 : game.player2;
+        player.grid = data.grid;
+        updateGrid();
+      }
+    });
     socket.on('guessed-correctly', function(data) {
       if (PLAYER === data.player) {
         var player = PLAYER === 1 ? game.player1 : game.player2;
