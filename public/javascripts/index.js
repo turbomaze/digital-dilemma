@@ -16,15 +16,37 @@ var DigitalDilemma = (function() {
   var grid = [];
 
   function initDigitalDilemma() {
-    // socket stuff
-    socket.on('toggle-1', function() {
-      console.log('swag');
-      toggleCell('#cell-5');
-    });
-    socket.on('toggle-2', function() {
-      toggleCell('#cell-10');
-    });
+    // init everything
+    for (var j = 0; j < 4; j++) {
+      for (var i = 0; i < 4; i++) {
+        // the state component of the grid
+        var cellId = j * 4 + i;
+        grid.push({
+          id: cellId,
+          letter: getLetter(cellId)
+        });
+      }
+    }
 
+    // load the grid in the html
+    populateGrid('grid-0', 'cell-0-', grid);
+    populateGrid('grid-1', 'cell-1-', grid);
+
+    // initialize grid colors
+    if (!false) {
+      RANDOM_COLORER_TIMER = setInterval(
+        function() {
+          randomlyColorGray('cell-0-');
+          randomlyColorGray('cell-1-');
+        },
+        INTERVAL_DELAY
+      );
+    } else {
+      randomlyColorGray('cell-0-');
+      randomlyColorGray('cell-1-');
+    }
+
+    // socket stuff
     socket.on('game-started', function() {
       // sync the client's game with the server's game
       game.isStarted = true;
@@ -39,7 +61,7 @@ var DigitalDilemma = (function() {
     // event listeners
     $('#secret-reset').click(function() {
       $.get(
-        '/api/game/reset', {}
+        '/api/reset', {}
       ).done(function(res) {
         if (res.success) {
           window.location = '/';
@@ -51,7 +73,7 @@ var DigitalDilemma = (function() {
 
     $('#start-button').click(function() {
       $.get(
-        '/api/game/start', {}
+        '/api/start', {}
       ).done(function(res) {
         if (res.success) {
           // game is started!
@@ -60,87 +82,23 @@ var DigitalDilemma = (function() {
         }
       });
     });
-
-    $('#digital-reset-button').click(function() {
-      $.post(
-        '/api/game/digital/reset', {}
-      ).done(function(res) {
-        if (res.success) {
-          // digital's path has been reset
-          game.path = [];
-          updatePath();
-        } else {
-          alert('Unable to digital reset.');
-        }
-      });
-    });
-
-    $('#grid').on('click', function(e) {
-      // pass through
-    }).on('click', '.cell', function(e) {
-      var index = e.target.id.substring('cell-'.length);
-      var intIndex = parseInt(index);
-      $.post(
-        '/api/game/digital/set/' + index, {}
-      ).done((function(idx) {
-        return function(res) {
-          if (res.success) {
-            // keep the client's game in sync
-            game.path.push(idx);
-
-            // redraw the path
-            updatePath();
-          } else {
-            console.log('Unable to set.');
-          }
-        };
-      })(intIndex));
-    });
-  }
-
-  function initializeInstructions() {
-    if (!game.isStarted) {
-      $('#instructions').text(MESSAGES['beginning']);
-    } else {
-      if (game.digitalIsSet) {
-        if (game.physicalIsSet) {
-          $('#instructions').text(MESSAGES['playing']);
-        } else {
-          $('#instructions').text(
-            MESSAGES['digital-waiting']
-          );
-        }
-      } else {
-        $('#instructions').text(MESSAGES['started']);
-      }
-    }
-  }
-
-  function updatePath() {
-    $('#path').text(getPathString());
-  }
-
-  function getPathString() {
-    return game.path.map(function(i) {
-      return getLetter(i);
-    }).join(',');
   }
 
   // the UI component of the grid
-  function populateGrid(containerId, gridToLoad) {
+  function populateGrid(containerId, cellName, gridToLoad) {
     for (var i = 0; i < gridToLoad.length; i++) {
       var div = document.createElement('div');
-      div.id = 'cell-' + gridToLoad[i].id;
+      div.id = cellName + gridToLoad[i].id;
       div.className = 'cell';
       div.innerHTML = gridToLoad[i].letter;
       document.getElementById(containerId).appendChild(div);
     }
   }
 
-  function randomlyColorGray() {
-    var count = game.dimensions.width * game.dimensions.height;
+  function randomlyColorGray(base) {
+    var count = 4 * 4;
     for (var i = 0; i < count; i++) {
-      var id = '#cell-' + i;
+      var id = '#' + base + i;
       var g = Math.floor(100 + 50 * Math.random());
       var oldGray = extractColor($(id).css('background-color'));
       if (oldGray != -1 && oldGray < 150 && oldGray > 100) {

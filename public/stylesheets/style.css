@@ -59,12 +59,12 @@ h1 {
 }
 
 .left {
-  width: 400px;
+  width: 350px;
   float: left;
 }
 
 .right {
-  width: 400px;
+  width: 350px;
   padding-left: 1rem;
   float: left;
 }
@@ -73,17 +73,21 @@ h1 {
   clear: both;
 }
 
-#grid {
-  width: 400px;
-  height: 400px;
+.grid {
+  width: 350px;
+  height: 350px;
   cursor: pointer;
 }
 
+#grid-1 {
+  transform: rotate(180deg);
+}
+
 .cell {
-  width: 100px;
-  height: 100px;
+  width: 87.5px;
+  height: 87.5px;
   float: left;
-  line-height: 100px;
+  line-height: 87.5px;
   text-align: center;
   font-size: 1.5rem;
   font-weight: bold;
