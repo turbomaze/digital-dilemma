@@ -36,47 +36,6 @@ var DigitalDilemma = (function() {
       $('#instructions').text(MESSAGES['started']);
     });
 
-    $.get(
-      '/api/game', {}
-    ).done(function(res) {
-      if (res.success) {
-        game = res.game;
-
-        // initialize the grid
-        for (var j = 0; j < game.dimensions.height; j++) {
-          for (var i = 0; i < game.dimensions.width; i++) {
-            // the state component of the grid
-            var cellId = j * game.dimensions.width + i;
-            grid.push({
-              id: cellId,
-              letter: getLetter(cellId)
-            });
-          }
-        }
-
-        // initialize the instructions
-        initializeInstructions();
-
-        // make sure you update the path
-        updatePath();
-
-        // load the grid in the html
-        populateGrid('grid', grid);
-
-        // initialize grid colors
-        if (!game.isStarted) {
-          RANDOM_COLORER_TIMER = setInterval(
-            randomlyColorGray,
-            INTERVAL_DELAY
-          );
-        } else {
-          randomlyColorGray();
-        }
-      } else {
-        alert(JSON.stringify(res.error));
-      }
-    });
-
     // event listeners
     $('#secret-reset').click(function() {
       $.get(

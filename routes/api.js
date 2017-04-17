@@ -15,32 +15,37 @@ module.exports = function(io) {
 
   function resetMainGame(success, failure) {
     // defaults
-    var defaultWidth = 4;
-    var defaultHeight = 4;
+    var defaultWidth = 2;
+    var defaultHeight = 2;
     var defaultLives = 3;
     var defaultTime = 60;
+
+    // make a list of zeroes
+    var zeroes = [];
+    for (var i = 0; i < defaultWidth * defaultHeight; i++) {
+      zeroes.push(0);
+    }
 
     Game.update({
       tag: process.env.PRIMARY_GAME_TAG
     }, {
       $set: {
-        isStarted: false,
-        isPaused: false,
-        isFinished: false,
-        physicalIsSet: false,
-        digitalIsSet: false,
-        isPaused: false,
         tag: process.env.PRIMARY_GAME_TAG,
         'dimensions.width': defaultWidth,
         'dimensions.height': defaultHeight,
-        digitalGrid: pyRange(defaultWidth * defaultHeight),
-        physicalGrid: [],
-        path: [],
-        guessedPath: [],
-        digitalLives: defaultLives,
-        physicalLives: defaultLives,
-        digitalTime: defaultTime,
-        physicalTime: defaultTime 
+        isStarted: false,
+        isPaused: false,
+        isFinished: false,
+        'player1.isSet': false,
+        'player1.grid': zeroes.slice(0),
+        'player1.guess': zeroes.slice(0),
+        'player1.lives': defaultLives,
+        'player1.time': defaultTime,
+        'player2.isSet': false,
+        'player2.grid': zeroes.slice(0),
+        'player2.guess': zeroes.slice(0),
+        'player2.lives': defaultLives,
+        'player2.time': defaultTime
       }
     }, {upsert: true}, function(err, data) {
       if (err) {
@@ -52,51 +57,6 @@ module.exports = function(io) {
   }
 
   // NORMAL API ENDPOINTS
-  router.get('/toggle/1', function(req, res) {
-    io.sockets.emit('toggle-1');
-    res.json({success: true});
-  });
-
-  router.get('/toggle/2', function(req, res) {
-    io.sockets.emit('toggle-2');
-    res.json({success: true});
-  });
-
-  // get all the public data for a game
-  router.get('/game', function(req, res) {
-    Game.findOne({
-      tag: process.env.PRIMARY_GAME_TAG
-    }, function(err, game) {
-      if (err || !game) {
-        console.log(err);
-        return res.json({success: false, error: err});
-      }
-
-      // return the rest to the client
-      res.json({
-        success: true,
-        game: {
-          isStarted: game.isStarted,
-          isPaused: game.isPaused,
-          isFinished: game.isFinished,
-          physicalIsSet: game.physicalIsSet,
-          digitalIsSet: game.digitalIsSet,
-          isPaused: game.isPaused,
-          tag: game.tag,
-          dimensions: {
-            width: game.dimensions.width,
-            height: game.dimensions.height,
-          },
-          digitalGrid: game.digitalGrid,
-          path: game.path,
-          digitalLives: game.digitalLives,
-          physicalLives: game.physicalLives,
-          digitalTime: game.digitalTime,
-          physicalTime: game.physicalTime
-        }
-      });
-    });
-  });
 
   router.get('/game/reset', function(req, res) {
     resetMainGame((function(myReq, myRes) {
@@ -139,7 +99,8 @@ module.exports = function(io) {
     });
   });
 
-  router.post('/game/digital/reset', function(req, res) {
+  router.post('/game/grid/:id/reset', function(req, res) {
+    var id = parseInt(req.params.id);
     Game.findOne({
       tag: process.env.PRIMARY_GAME_TAG
     }, function(err, game) {
@@ -148,11 +109,14 @@ module.exports = function(io) {
         return res.json({success: false, error: err});
       }
 
+      var player = id === 1 ? game.player1 : game.player2;
       if (
-        game.isStarted && !game.digitalIsSet &&
+        game.isStarted && !player.isSet &&
         !game.isPaused
       ) {
-        game.path = [];
+        for (var i = 0; i < player.grid.length; i++) {
+          game.path[i] = 0;
+        }
         game.save(function(err) {
           if (err) {
             console.log(err);
@@ -164,24 +128,15 @@ module.exports = function(io) {
       } else {
         return res.json({
           success: false,
-          error: 'cannot digital reset right now'
+          error: 'cannot reset player\'s grid right now'
         });
       }
     });
   });
 
-  router.post('/game/digital/set/done', function(req, res) {
-    /*
-    if !isStarted || digitalIsSet || path.length == 0
-      do nothing
-    else
-      digitalIsSet = true
-      check for all-are-set condition
-    */
-    res.json({success: false, message: 'not impl'});
-  });
-
-  router.post('/game/digital/set/:id', function(req, res) {
+  router.post('/game/grid/:id/set/:color', function(req, res) {
+    var id = parseInt(req.params.id);
+    var color = parseInt(req.params.color);
     Game.findOne({
       tag: process.env.PRIMARY_GAME_TAG
     }, function(err, game) {
@@ -190,14 +145,17 @@ module.exports = function(io) {
         return res.json({success: false, error: err});
       }
 
-      var i = parseInt(req.params.id);
+      var player = id === 1 ? game.player1 : game.player2;
       if (
-        game.isStarted && !game.digitalIsSet &&
-        !game.isPaused &&
-        i >= 0 &&
-        i < game.dimensions.width * game.dimensions.height
+        game.isStarted && !player.isSet &&
+        !game.isPaused
       ) {
-        game.path.push(i);
+        for (var i = 0; i < player.grid.length; i++) {
+          if (player.grid[i] === 0) {
+            player.grid[i] = color;
+            break;
+          }
+        }
         game.save(function(err) {
           if (err) {
             console.log(err);
@@ -209,30 +167,10 @@ module.exports = function(io) {
       } else {
         return res.json({
           success: false,
-          error: 'cannot digital set right now'
+          error: 'cannot set player\'s grid right now'
         });
       }
     });
-  });
-
-  router.get('/game/physical/reset', function(req, res) {
-    /*
-    if !isStarted || physicalIsSet
-      do nothing
-    else
-      reset the correct grid state for physical
-    */
-    res.json({success: false, message: 'not impl'});
-  });
-
-  router.get('/game/physical/set/:id', function(req, res) {
-    /*
-    if !isStarted || physicalIsSet
-      do nothing
-    else
-      set the next subsequent component of the correct grid
-    */
-    res.json({success: false, message: 'not impl'});
   });
 
   return router;

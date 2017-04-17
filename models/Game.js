@@ -3,11 +3,6 @@ var mongoose = require('mongoose');
 var requiredBoolean = {type: Boolean, required: true};
 var requiredInt = {type: Number, required: true};
 var GameSchema = new mongoose.Schema({
-  isStarted: requiredBoolean,
-  isPaused: requiredBoolean,
-  isFinished: requiredBoolean,
-  physicalIsSet: requiredBoolean,
-  digitalIsSet: requiredBoolean,
   tag: {
     required: true,
     type: String
@@ -22,14 +17,23 @@ var GameSchema = new mongoose.Schema({
       required: true
     }
   },
-  digitalGrid: [Number],
-  physicalGrid: [Number],
-  path: [Number],
-  guessedPath: [Number],
-  digitalLives: requiredInt,
-  physicalLives: requiredInt,
-  digitalTime: requiredInt,
-  physicalTime: requiredInt
+  isStarted: requiredBoolean,
+  isPaused: requiredBoolean,
+  isFinished: requiredBoolean,
+  player1: {
+    isSet: requiredBoolean,
+    grid: [Number], // [0|1|2, ... 4 total, 0|1|2]
+    guess: [Number], // [0|1|2, ... 4 total, 0|1|2]
+    lives: requiredInt,
+    time: requiredInt
+  },
+  player2: {
+    isSet: requiredBoolean,
+    grid: [Number], // [0|1|2, ... 4 total, 0|1|2]
+    guess: [Number], // [0|1|2, ... 4 total, 0|1|2]
+    lives: requiredInt,
+    time: requiredInt
+  }
 }, {
   timestamps: true  
 });
