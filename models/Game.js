@@ -20,10 +20,13 @@ var GameSchema = new mongoose.Schema({
   isStarted: requiredBoolean,
   isPaused: requiredBoolean,
   isFinished: requiredBoolean,
+  turn: requiredBoolean, // true player1, false player2
   player1: {
     isSet: requiredBoolean,
     grid: [Number], // [0|1|2, ... 4 total, 0|1|2]
     guess: [Number], // [0|1|2, ... 4 total, 0|1|2]
+    guessPosition: requiredInt, // position in grid they're guessing
+    isSafe: requiredBoolean, // whether they're safe this round
     lives: requiredInt,
     time: requiredInt
   },
@@ -31,6 +34,8 @@ var GameSchema = new mongoose.Schema({
     isSet: requiredBoolean,
     grid: [Number], // [0|1|2, ... 4 total, 0|1|2]
     guess: [Number], // [0|1|2, ... 4 total, 0|1|2]
+    guessPosition: requiredInt, // position in grid they're guessing
+    isSafe: requiredBoolean, // whether they're safe this round
     lives: requiredInt,
     time: requiredInt
   }

@@ -36,14 +36,20 @@ module.exports = function(io) {
         isStarted: false,
         isPaused: false,
         isFinished: false,
+        turn: true,
         'player1.isSet': false,
         'player1.grid': zeroes.slice(0),
         'player1.guess': zeroes.slice(0),
+        'player1.guessPosition': -1,
+        'player1.isSafe': false,
         'player1.lives': defaultLives,
         'player1.time': defaultTime,
+
         'player2.isSet': false,
         'player2.grid': zeroes.slice(0),
         'player2.guess': zeroes.slice(0),
+        'player2.guessPosition': -1,
+        'player2.isSafe': false,
         'player2.lives': defaultLives,
         'player2.time': defaultTime
       }
@@ -58,7 +64,7 @@ module.exports = function(io) {
 
   // NORMAL API ENDPOINTS
 
-  router.get('/game/reset', function(req, res) {
+  router.get('/reset', function(req, res) {
     resetMainGame((function(myReq, myRes) {
       return function(err, data) {
         return myRes.json({success: true});
@@ -71,7 +77,7 @@ module.exports = function(io) {
     })(req, res));
   });
 
-  router.get('/game/start', function(req, res) {
+  router.get('/start', function(req, res) {
     Game.findOne({
       tag: process.env.PRIMARY_GAME_TAG
     }, function(err, game) {
@@ -99,7 +105,7 @@ module.exports = function(io) {
     });
   });
 
-  router.post('/game/grid/:id/reset', function(req, res) {
+  router.post('/grid/:id/reset', function(req, res) {
     var id = parseInt(req.params.id);
     Game.findOne({
       tag: process.env.PRIMARY_GAME_TAG
@@ -134,7 +140,7 @@ module.exports = function(io) {
     });
   });
 
-  router.post('/game/grid/:id/set/:color', function(req, res) {
+  router.post('/grid/:id/set/:color', function(req, res) {
     var id = parseInt(req.params.id);
     var color = parseInt(req.params.color);
     Game.findOne({
@@ -150,12 +156,100 @@ module.exports = function(io) {
         game.isStarted && !player.isSet &&
         !game.isPaused
       ) {
+        var allAreReplaced = true;
         for (var i = 0; i < player.grid.length; i++) {
           if (player.grid[i] === 0) {
             player.grid[i] = color;
+            if (i !== player.grid.length - 1) {
+              allAreReplaced = false;
+            }
             break;
           }
         }
+
+        if (!replacedAColor) {
+          player.isSet = true;
+        }
+
+        game.save(function(err) {
+          if (err) {
+            console.log(err);
+            return res.json({success: false, error: err});
+          }
+
+          res.json({success: true});
+        });
+      } else {
+        return res.json({
+          success: false,
+          error: 'cannot set player\'s grid right now'
+        });
+      }
+    });
+  });
+
+  router.post('/grid/:id/position/:pos', function(req, res) {
+    var id = parseInt(req.params.id);
+    var pos = parseInt(req.params.pos);
+    Game.findOne({
+      tag: process.env.PRIMARY_GAME_TAG
+    }, function(err, game) {
+      if (err || !game) {
+        console.log(err);
+        return res.json({success: false, error: err});
+      }
+
+      var player = id === 1 ? game.player1 : game.player2;
+      if (
+        game.isStarted && !game.isPaused &&
+        game.player1.isSet && game.player2.isSet
+      ) {
+        player.guessPosition = pos;
+        game.save(function(err) {
+          if (err) {
+            console.log(err);
+            return res.json({success: false, error: err});
+          }
+
+          res.json({success: true});
+        });
+      } else {
+        return res.json({
+          success: false,
+          error: 'cannot set player\'s grid right now'
+        });
+      }
+    });
+  });
+
+  router.post('/grid/:id/guess/:color', function(req, res) {
+    var id = parseInt(req.params.id);
+    var color = parseInt(req.params.color);
+    Game.findOne({
+      tag: process.env.PRIMARY_GAME_TAG
+    }, function(err, game) {
+      if (err || !game) {
+        console.log(err);
+        return res.json({success: false, error: err});
+      }
+
+      var player = id === 1 ? game.player1 : game.player2;
+      var other = id === 1 ? game.player2 : game.player1;
+      if (
+        game.isStarted && !game.isPaused &&
+        game.player1.isSet && game.player2.isSet
+      ) {
+        // get the right answer
+        var rightAnswer = other.grid[player.guessPosition];
+        // compare to their guess
+        var guessedRight = rightAnswer == color;
+        var newGuess = player.guess[player.guessPosition] === 0;
+        if (guessedRight && newGuess) {
+          player.isSafe = true;
+        } else if (!guessedRight) {
+          player.lives = player.lives - 1;
+        }
+
         game.save(function(err) {
           if (err) {
             console.log(err);
