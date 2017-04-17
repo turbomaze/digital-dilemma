@@ -79,7 +79,7 @@ module.exports = function(io) {
         return res.json({success: false, error: err});
       }
 
-      if (game.isStarted && !game.isPaused) {
+      if (game.isStarted && !game.isPaused && !game.isFinished) {
         var gameOver = false;
         var lostLife = false;
         var player = game.turn ? game.player1 : game.player2;
@@ -93,6 +93,7 @@ module.exports = function(io) {
             lostLife = true;
             if (player.lives === 0) {
               gameOver = true;
+              game.isFinished = true;
             }
           } else {
             player.isSafe = false;
@@ -122,13 +123,13 @@ module.exports = function(io) {
             io.sockets.emit('game-over', {
               winner: game.turn ? 1 : 2
             });
+          } else {
+            var end = +new Date();
+            var duration = end - start;
+
+            // call the timer again if it should be continued
+            setTimeout(decreaseTimer, 1000 - duration);
           }
-
-          var end = +new Date();
-          var duration = end - start;
-
-          // call the timer again if it should be continued
-          setTimeout(decreaseTimer, 1000 - duration);
         });
       } else {
         // oops
@@ -196,7 +197,7 @@ module.exports = function(io) {
       var player = id === 1 ? game.player1 : game.player2;
       if (
         game.isStarted && !player.isSet &&
-        !game.isPaused
+        !game.isPaused && !game.isFinished
       ) {
         for (var i = 0; i < player.grid.length; i++) {
           game.path[i] = 0;
@@ -232,7 +233,7 @@ module.exports = function(io) {
       var player = id === 1 ? game.player1 : game.player2;
       if (
         game.isStarted && !player.isSet &&
-        !game.isPaused
+        !game.isPaused && !game.isFinished
       ) {
         var allAreReplaced = true;
         for (var i = 0; i < player.grid.length; i++) {
@@ -279,7 +280,7 @@ module.exports = function(io) {
 
       var player = id === 1 ? game.player1 : game.player2;
       if (
-        game.isStarted && !game.isPaused &&
+        game.isStarted && !game.isPaused && !game.isFinished &&
         game.player1.isSet && game.player2.isSet
       ) {
         player.guessPosition = pos;
@@ -314,7 +315,7 @@ module.exports = function(io) {
       var player = id === 1 ? game.player1 : game.player2;
       var other = id === 1 ? game.player2 : game.player1;
       if (
-        game.isStarted && !game.isPaused &&
+        game.isStarted && !game.isPaused && !game.isFinished &&
         game.player1.isSet && game.player2.isSet
       ) {
         // get the right answer

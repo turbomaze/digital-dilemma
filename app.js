@@ -36,7 +36,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // handle sessions
 var mongoStore = new MongoStore({
-	mongooseConnection: mongoose.connection
+  mongooseConnection: mongoose.connection
 });
 app.use(session({
   store: mongoStore,

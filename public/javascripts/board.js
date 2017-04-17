@@ -53,6 +53,14 @@ var DigitalDilemmaBoard = (function() {
         updateLives();
       }
     });
+    socket.on('game-over', function(data) {
+      if (PLAYER === data.winner) {
+        alert('Congrats! You won!');
+      } else {
+        alert('Aww, you lost the game.');
+      }
+      window.location.reload(true);
+    });
   }
 
   function updateTime() {
